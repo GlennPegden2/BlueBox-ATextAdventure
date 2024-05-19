@@ -4,3 +4,9 @@ Part old school telephony/PSTN/POST BlueBox tutorial, part text adventure. This 
 Implemented as just a simple web page (html/js) using WebAudio
 
 To be debuted at the Retro Hands-On-Hacking village at BSides Leeds 2024
+
+Orginally part of the RetroNetSec Project, but split out as it works just fine as a stand alone thing
+
+Usage:
+
+Either run from docker or just drop in any websever.

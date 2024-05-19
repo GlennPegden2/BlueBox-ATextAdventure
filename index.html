@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BlueBox: A Text Adventure</title>
+    <link rel="stylesheet" href="css/style.css">
+
+<script type="text/javascript" src="js/dtmf.js"></script>
+<script type="text/javascript" src="js/blueboxdemo.js"></script>
+<script type="text/javascript">
+
+	var receiver = new Receiver({ duration: 100, step: 10 });
+	var phoneNet = new PhoneNetwork();
+
+
+	function toggleHook() {
+		var output = document.getElementById("output");
+
+		if (phoneNet.home.offhook == true) {
+			phoneNet.processEvent("OnHook")
+			receiver.stop();
+		} else {
+			phoneNet.home.offhook = true;
+			phoneNet.processEvent("OffHook")
+
+			navigator.getUserMedia({
+			audio: true
+			}, function(stream) {
+			receiver.start(stream, function(event) {
+				if (event != "Clear") {
+					phoneNet.processEvent(event);
+				}	
+			});
+			}, function(e) {
+			alert('Cannot access audio stream.');
+			console.log(e);
+			});
+
+		}
+	}
+
+	function toggleLog() {
+		var eventlog = document.getElementById("eldiv");
+
+		if (eventlog.style.visibility == "hidden") {
+			eventlog.style.visibility = "visible";
+		} else {
+			eventlog.style.visibility = "hidden";
+		}
+	}
+
+	function reset() {
+		var output = document.getElementById("output");
+
+		phoneNet.processEvent("OnHook");
+		output.innerHTML = "";
+	}
+
+</script>
+</head>
+
+<body>
+
+<h3>BlueBox: The Text Adventure</h3>
+<div id="output"  class="scrollpas">
+	<div>
+		<div>Welcome to BlueBox: The Text Adventure! The Teach Yourself Blueboxing (80s style) Text Adventure. Unlike a traditional text adventure, you drop type command, you play tones into the microphone as if it was an old school telephone. 
+			At the top of the screen is an indication of what is happening on the phone network (more will be revealed as you progress) and some action buttons (Toggle Phone Hook simulates lifting the phone reciever/handset, that'a a good place to start.</div>
+		<div>If they is your first attempt at doing this, turning on the verbose log may help you understand what is happening as a lower level.</div>
+		<div>To progress you will need some kind of "Blue Box" device. As Steve Wozniak is no longer selling them and Captain Crunch whistles are no longer in cerial, you can either use a web based one such the one from phreaknet.org/bluebox or fire up the Phreaking Tool DOS machine in RetroNetSec.</div>
+	</div>
+</div>
+<hr/>
+
+<h3>Network Status</h3>
+<table style="width: 100%; table-layout: fixed">
+	<tr>
+		<td valign="top" style="width: 75%;">
+			<table style="width: 100%; table-layout: fixed">
+				<tr><th>Local Phone</th><th>Local exchange</th><th>Remote Exchange</th><th>Remote Phone Number</th></tr>
+				<tr><td id="hook"  style="visibility:hidden">OnHook</td><td  id="lexconnected" style="visibility: hidden"></td><td  id="rexdiv"></td><td  id="fpndiv"></td></tr>
+				<tr><td id="dialtone" style="visibility: hidden"></td><td  id="lexline" style="visibility: hidden"></td><td  id=""></td><td  id=""></td></tr>
+				<tr><td id="dialednumber" style="visibility: hidden"></td><td  id="lexdialednumber" style="visibility: hidden"></td></td><td  id=""></td><td  id=""></td></tr>
+				<tr><td id="connected" style="visibility: hidden"></td><td  id=""></td><td  id=""></td><td  id=""></td></tr>
+			</table>
+		</td>
+		<td valign="top">
+			<h3>Action Buttons</h3>
+			<p>Input in the form of tones is also accepted over the microphone</p>
+			<button onclick="reset()">[ Reset ]</button>&nbsp;<button onclick="toggleHook()">[ Toggle Phone Hook ]</button>&nbsp;<button onclick="toggleLog()">[ Toggle Verbose Log ]</button>	
+		</td>
+	</tr>
+</table>
+
+
+
+
+<div style="visibility: hidden" id="eldiv">
+	<h3>Verbose Event Log</h3>
+	<div id="eventlog"></div>
+</div>
+<p style="display:none">DMTF decoding based on https://github.com/meefik/dtmf.js (but extended to cover R1/MF & SS5 signalling tones)</p>
+
