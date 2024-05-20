@@ -181,7 +181,7 @@ class tones {
               tc.dtmf.last = c 
             } else if (toneType == 2) {
               // SS5
-              minLen = 2;
+              minLen = 0.3;
               maxLen = 5;
               c = tc.ss5.Chars[t1][t2];  
               last = tc.ss5.last;

@@ -19,11 +19,13 @@ class PhoneNetwork {
     }
 
     ppn = {
-        number: "0016304852995"
+        number: "0016304852995",
+        connected: false
     }
 
     fpn = {
-        number: "0800890808"
+        number: "0800890808",
+        connected: false
     }
 
     eventcount = 0;
@@ -147,16 +149,30 @@ class PhoneNetwork {
                     } else if (this.lex.lineup) {
                         if (this.lex.linesiezed) {
 
-                            this.lex.trunkdialed += event.substring(4,event.length)
-                            this.addToEventLog("Remote Exchange heard trunk command "+event+" ");
-                            if (divlexdialednumber.style.visibility == "hidden" && event == "SS5KP") {
-                                this.addToOputput("You play a KP tone, which makes the trunk think it's about to revcieve a number to dial. Normally only the exchange can send these numbers, but as you seized the trunk, you now can too!");
-                                divdialednumber.style.visibility = "visible";
-                            } else if (divlexdialednumber.style.visibility == "hidden" && event != "SS5KP")  {
-                                this.addToOputput("You play a tone the trunk understands, but you didn't start the message properly.");
-                            }  else {
-                                // Are we nearly there yet?
-                            }        
+                            this.addToEventLog("Exchange heard trunk command "+event+" ");
+                            if (event == "SS5KP") {
+                                if (this.home.dailedNumber = "") {
+                                    this.home.dailedNumber += event.substring(4,event.length)
+                                    this.addToOputput("You play a KP tone, which makes the trunk think it's about to revcieve a number to dial. Normally only the exchange can send these numbers, but as you seized the trunk, you now can too!");
+                                } 
+                            } else if (event == "ST") { 
+                                this.addToOputput("You play a ST tone, this tells the trunk to connect to the number");
+                                if (this.home.dailedNumber == "KP" + ppn )  {
+                                    this.addToOputput("A few seconds pass and the click, you are connected. Congratulations you have just sucessfully blue boxed. As far as billing systems are concerned you are connected to a free phone 0800 number, but you are actually connected to a paid number");
+
+                                } else {
+                                    this.addToOputput("KP+"+event+"ST seems like a valid number, but not the one the demo recognises, try "+ppn+".");
+                                }
+                            } else {
+                                if (this.home.dailedNumber.substring(0,1) = "KP") {
+                                    this.this.home.dailedNumber += event.substring(4,event.length)
+                                    this.addToOputput("You play tones the trunk recognises as valid tones");
+
+                                } else {
+                                    this.addToOputput("You play a tone the trunk understands, but you didn't start the message properly.");
+                                    this.home.dailedNumber = "";
+                                }
+                            } 
 
                             this.updateStatus();
 
@@ -220,6 +236,7 @@ class PhoneNetwork {
                 this.home.connected = false;
                 this.lex.connected = true;
                 this.lex.linesiezed = true;
+                this.home.dailedNumber = ""
                 } else {
                     // Not sure this can even get here now
                 this.addToOputput("You blow your little Captain Crunch whistle, or press the magic button on your Blue Box and nothing happens. Maybe because you're not connected to the exchange. Try dialing a number!");
