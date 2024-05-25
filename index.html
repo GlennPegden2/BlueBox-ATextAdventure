@@ -28,9 +28,7 @@
 			audio: true
 			}, function(stream) {
 			receiver.start(stream, function(event) {
-				if (event != "Clear") {
 					phoneNet.processEvent(event);
-				}	
 			});
 			}, function(e) {
 			alert('Cannot access audio stream.');
@@ -63,12 +61,18 @@
 <body>
 
 <h3>BlueBox: The Text Adventure</h3>
+<div>
+	<div style="text-align:right; width:100%"><img src="/images/Reset.svg" alt="Restart" onclick="reset()"  style="width: 3em;">&nbsp;<img src="/images/Phone Not Being Used.svg" alt="Toggle Phone Hook" onclick="toggleHook()" style="width: 3em;">&nbsp;<img src="/images/File.svg" alt="Toggle Verbose Logging" onclick="toggleLog()"  style="width: 3em;"></div>	
+	<p style="text-align:right; width:100%">Input in the form of tones is also accepted over the microphone</p>
+</div>
+<hr/>
+
 <div id="output"  class="scrollpas">
 	<div>
-		<div>Welcome to BlueBox: The Text Adventure! The Teach Yourself Blueboxing (80s style) Text Adventure. Unlike a traditional text adventure, you drop type command, you play tones into the microphone as if it was an old school telephone. 
-			At the top of the screen is an indication of what is happening on the phone network (more will be revealed as you progress) and some action buttons (Toggle Phone Hook simulates lifting the phone reciever/handset, that'a a good place to start.</div>
-		<div>If they is your first attempt at doing this, turning on the verbose log may help you understand what is happening as a lower level.</div>
-		<div>To progress you will need some kind of "Blue Box" device. As Steve Wozniak is no longer selling them and Captain Crunch whistles are no longer in cerial, you can either use a web based one such the one from phreaknet.org/bluebox or fire up the Phreaking Tool DOS machine in RetroNetSec.</div>
+		<p>Welcome to BlueBox: The Text Adventure! The Teach Yourself Blueboxing (80s style) Text Adventure. Unlike a traditional text adventure, you drop type command, you play tones into the microphone as if it was an old school telephone. 
+			At the top of the screen is an indication of what is happening on the phone network (more will be revealed as you progress) and some action buttons (Toggle Phone Hook simulates lifting the phone reciever/handset, that'a a good place to start).</p>
+		<p>If this is your first attempt at doing this, turning on the verbose log may help you understand what is happening as a lower level.</p>
+		<p>To progress you will need some kind of "Blue Box" device. As Steve Wozniak is no longer selling them and Captain Crunch whistles are no longer in cerial, you can either use a web based one such the one from phreaknet.org/bluebox or fire up the Phreaking Tool DOS machine in RetroNetSec.</p>
 	</div>
 </div>
 <hr/>
@@ -85,11 +89,6 @@
 				<tr><td id="connected" style="visibility: hidden"></td><td  id=""></td><td  id=""></td></tr>
 			</table>
 		</td>
-		<td valign="top">
-			<h3>Action Buttons</h3>
-			<p>Input in the form of tones is also accepted over the microphone</p>
-			<button onclick="reset()">[ Reset ]</button>&nbsp;<button onclick="toggleHook()">[ Toggle Phone Hook ]</button>&nbsp;<button onclick="toggleLog()">[ Toggle Verbose Log ]</button>	
-		</td>
 	</tr>
 </table>
 
@@ -100,5 +99,6 @@
 	<h3>Verbose Event Log</h3>
 	<div id="eventlog"></div>
 </div>
-<p style="display:none">DMTF decoding based on https://github.com/meefik/dtmf.js (but extended to cover R1/MF & SS5 signalling tones)</p>
+<hr>
+<p >DMTF decoding based on https://github.com/meefik/dtmf.js (but extended to cover R1/MF & SS5 signalling tones). Icons courtesy of <a href="https://www.visualpharm.com/free-icons/">https://www.visualpharm.com/free-icons/</a></p>
 

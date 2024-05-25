@@ -2,6 +2,8 @@ class PhoneNetwork {
     constructor() {
     }
 
+    lastevent = "";
+
     //home, lex, rex, fpn, ppn, trun
     home  = {
         offhook: false,
@@ -107,13 +109,17 @@ class PhoneNetwork {
         
         console.log("New Event: "+this.eventcount+" "+event);
 
-        if ((event.substring(0,2) == "SS") || (event.substring(0,4) == "DTMF" ) || (event.substring(0,2) == "R1")){
+        if ((event.substring(0,2) == "SS") || (event.substring(0,4) == "DTMF" ) || (event.substring(0,2) == "R1") || (event == "CLR")){
             // It's a tone!
 
-            if ((this.home.offhook == false) ) {
+            if (event == this.lastevent) {
+                console.log("Suppressed detection of multiple same tone / long tone "+event)
+            } else if (event == "CLR") {
+                console.log("Clear recieved");
+                this.lastevent = "";
+            } else if ((this.home.offhook == false) ) {
                 this.addToOputput("You may have tried dialing "+event+", or it may be background noise, either way the reciever is on the hook, so nothing happens");
                 this.addToEventLog("Local phone heard "+event+" (ignored, onhook)");
-                return;
             } else if (event.substring(0,4) == "DTMF" ) {
                     if (this.home.dialtone == true) {
 
@@ -123,6 +129,12 @@ class PhoneNetwork {
                             this.addToOputput("You play a tone associated with dialing a number on the reciever. Congratulations! You have discovered the playing DTMF tones gives just the same result as pressing the number keys on your phone. Now to try dialing a whole phone number");
                             divdialednumber.style.visibility = "visible";
                         }            
+
+                        if ((this.home.dailedNumber != this.fpn.number.substring(0,this.home.dailedNumber.length)) && (this.home.dailedNumber != this.ppn.number.substring(0,this.home.dailedNumber.length))) {
+                            this.addToOputput("Warning: You have dialed "+this.home.dailedNumber+" and this demo only supports two numbers. "+this.ppn.number+" and "+this.fpn.number+", so what you are doing probably isn't going to work. Try putting the phone back on the hook and taking it off again to restart dialing");  
+                        }      
+    
+
                     } else {
                         if (this.home.connected) {
                             this.addToEventLog("Local phone heard "+event+" (ignored as no dialtone, forwarded to remote exchange)");
@@ -131,11 +143,8 @@ class PhoneNetwork {
                         }
                     }    
 
-                    if ((this.home.dailedNumber != this.fpn.number.substring(0,this.home.dailedNumber.length)) && (this.home.dailedNumber != this.ppn.number.substring(0,this.home.dailedNumber.length))) {
-                        this.addToOputput("Warning: You have dialed "+this.home.dailedNumber+" and this demo only supports two numbers. "+this.ppn.number+" and "+this.fpn.number+", so what you are doing probably isn't going to work. Try putting the phone back on the hook and taking it off again to restart dialing");  
-                    }      
 
-                } else if ((event.substring(0,2) == "SS" || event.substring(0,2) == "R1" )) {
+            } else if ((event.substring(0,2) == "SS" || event.substring(0,2) == "R1" )) {
 
                     if (this.home.connected) {
                         this.addToEventLog("Local phone heard "+event+" (ignored, forwarded to localexchange)");
@@ -151,31 +160,30 @@ class PhoneNetwork {
 
                             this.addToEventLog("Exchange heard trunk command "+event+" ");
                             if (event == "SS5KP") {
-                                if (this.home.dailedNumber = "") {
-                                    this.home.dailedNumber += event.substring(4,event.length)
+                                    this.home.dailedNumber = "KP";
                                     this.addToOputput("You play a KP tone, which makes the trunk think it's about to revcieve a number to dial. Normally only the exchange can send these numbers, but as you seized the trunk, you now can too!");
-                                } 
-                            } else if (event == "ST") { 
+                            } else if (event.substring(0,5) == "SS5SZ") { 
+                                console.log("Seize heard, but line already seized");
+                            } else if (event == "SS5ST") { 
                                 this.addToOputput("You play a ST tone, this tells the trunk to connect to the number");
-                                if (this.home.dailedNumber == "KP" + ppn )  {
+                                if (this.home.dailedNumber == ("KP" + this.ppn.number) )  {
                                     this.addToOputput("A few seconds pass and the click, you are connected. Congratulations you have just sucessfully blue boxed. As far as billing systems are concerned you are connected to a free phone 0800 number, but you are actually connected to a paid number");
 
                                 } else {
-                                    this.addToOputput("KP+"+event+"ST seems like a valid number, but not the one the demo recognises, try "+ppn+".");
+                                    this.addToOputput("KP+"+event+"ST seems like a valid number, but not the one the demo recognises, try "+this.ppn.number+".");
                                 }
                             } else {
-                                if (this.home.dailedNumber.substring(0,1) = "KP") {
-                                    this.this.home.dailedNumber += event.substring(4,event.length)
-                                    this.addToOputput("You play tones the trunk recognises as valid tones");
+                                if (this.home.dailedNumber.substring(0,2) == "KP") {
+                                    this.home.dailedNumber += event.substring(3)
+                                    this.addToOputput("You play tones the trunk recognises as valid tones,"+event.substring(3)+". So far the trunk has heard "+this.home.dailedNumber);
+                                    console.log("Dialed number in "+this.home.dailedNumber+" (added "+event.substring(3)+")")
 
                                 } else {
                                     this.addToOputput("You play a tone the trunk understands, but you didn't start the message properly.");
+                                    console.log("Expected KP, got |"+this.home.dailedNumber+"|");
                                     this.home.dailedNumber = "";
                                 }
                             } 
-
-                            this.updateStatus();
-
 
                         } else {
                             this.addToEventLog("Heard "+event+ "(ignored)");
@@ -184,24 +192,18 @@ class PhoneNetwork {
 
                     }
 
-                }
+            }
 
 
-                if (((this.home.dailedNumber == this.ppn.number) || (this.home.dailedNumber == this.fpn.number)) && this.home.connected == false) {
-                    if ( this.lex.connected == false ) {
-                        this.processEvent("Connected");
-                    }    else {
-//                        console.log("DEBUG: lex is already connected")
-                    }
-                } else {
+            if ((((this.home.dailedNumber == this.ppn.number) || (this.home.dailedNumber == this.fpn.number)) && this.home.connected == false) ||
+               (((this.home.dailedNumber == "KP" + this.ppn.number + "ST") || (this.home.dailedNumber == "KP" + this.fpn.number + "ST")) && this.lex.linesiezed == true)) {
+                    this.processEvent("Connected");
+            } else {
 //                    console.log("DEBUG: checking |"+this.home.dailedNumber+ "| against |"+this.ppn.number+"| and |"+this.fpn.number+"|");
-                }
+            }
 
-            this.updateStatus();
 
-        }
-
-        if (event == "Connected") {
+        } else if (event == "Connected") {
             this.home.connected = true;
             this.home.dialtone = false;
             this.lex.lineup = true;
@@ -228,9 +230,7 @@ class PhoneNetwork {
                 }
             this.updateStatus();
 
-        }
-
-        if (event == "Sieze") {
+        } else if (event == "Sieze") {
             if (this.lex.lineup == true) {
                 this.addToOputput("Congratulations! You found the frquency and siezed the line. The precise frequency may vary (R1 is 2600hz, others are 2400Hz, SS5 is a combo of 2400Hz and 2600Hz. You're the Captain Now! You are talking to the phone exchance, but it doesn't realise you're even still connected!");
                 this.home.connected = false;
@@ -241,49 +241,45 @@ class PhoneNetwork {
                     // Not sure this can even get here now
                 this.addToOputput("You blow your little Captain Crunch whistle, or press the magic button on your Blue Box and nothing happens. Maybe because you're not connected to the exchange. Try dialing a number!");
             }
-        }
-
-
-        if ((this.home.offhook == false) && ((event.substring(0,2) == "SS") || (event.substring(0,4) == "DTMF" ))) {
+        } else if ((this.home.offhook == false) && ((event.substring(0,2) == "SS") || (event.substring(0,4) == "DTMF" ))) {
             this.addToOputput("You try dialing "+event+", but the reciever is on the hook, so nothing happens");
-            return;
 
-        }
+        } else {
+            switch (event) {
+                case "OffHook": 
+                    if (divhook.style.visibility == "hidden") {
+                        this.addToOputput("You lift the receiever (handset) and the silent phone now makes a constant, long, buuuuuuuuurrrrrrrb sound.<br/><br/>Congratulations! You have discovered how the reciever (handset) on a pre-digital phone works, if it is on the hook, nothing works, you need to lift if off the hook for anything useful to happen. You have also learnt that when you take a phone off the hook, you should be greeted with a dialtone.");
+                        divhook.style.visibility = "visible";
+                        divdialtone.style.visibility = "visible";
+                    } else {
+                        this.addToOputput("You lift the reciever and hear a dialtone");
+                    }    
 
-        switch (event) {
-            case "OffHook": 
-            if (divhook.style.visibility == "hidden") {
-                this.addToOputput("You lift the receiever (handset) and the silent phone now makes a constant, long, buuuuuuuuurrrrrrrb sound.<br/><br/>Congratulations! You have discovered how the reciever (handset) on a pre-digital phone works, if it is on the hook, nothing works, you need to lift if off the hook for anything useful to happen. You have also learnt that when you take a phone off the hook, you should be greeted with a dialtone.");
-                divhook.style.visibility = "visible";
-                divdialtone.style.visibility = "visible";
-            } else {
-                this.addToOputput("You lift the reciever and hear a dialtone");
-            }    
-
-            this.addToEventLog(" Local Phone: "+event+" ");
-            
-            this.home.dialtone = true;
-            this.home.connected = false; 
-            this.home.dailedNumber = "";
-            this.home.offhook = true;
-
-            this.updateStatus();
-            break;
-
-        case "OnHook": 
-            this.addToOputput("You put the reciever back down and no longer hear anything from the phone");
-            this.home.dialtone = false;
-            this.home.connected = false; 
-            this.home.offhook = false;
-            this.home.dailedNumber = "";
-            this.lex.lineup = false;
-
-            this.addToEventLog(" Local Phone: "+event+" ");
+                    this.addToEventLog(" Local Phone: "+event+" ");
+                    
+                    this.home.dialtone = true;
+                    this.home.connected = false; 
+                    this.home.dailedNumber = "";
+                    this.home.offhook = true;
+                    break;
 
 
-            this.updateStatus();
-            break;  
-        }     
-        
+                case "OnHook": 
+                    this.addToOputput("You put the reciever back down and no longer hear anything from the phone");
+                    this.home.dialtone = false;
+                    this.home.connected = false; 
+                    this.home.offhook = false;
+                    this.home.dailedNumber = "";
+                    this.lex.lineup = false;
+
+                    this.addToEventLog(" Local Phone: "+event+" ");
+                    break;
+
+            }     
+        }    
+
+        this.lastevent = event;    
+        this.updateStatus();
+
     }
   }

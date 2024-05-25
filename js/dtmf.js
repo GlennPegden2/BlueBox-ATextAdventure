@@ -121,7 +121,9 @@ class tones {
           this.options = options;
         }
 
- 
+
+        lastTone = "";
+
         start(stream, cb) {
           if (this._timer || !cb) return;
       
@@ -190,8 +192,13 @@ class tones {
               tc.ss5.last = c 
             } else if (toneType == 3) {
               // CLEAR 
-//              console.log("Clear");
-              c = "";
+              c = "CLR";
+              if ((tc.ss5.last != c) && (tc.dtmf.last != c)) {
+                console.log("Clear");
+                tc.ss5.last = c;
+                tc.dtmf.last = c;
+                cb(c);
+              }
             }
 
             var minCnt = (step * 0.75)*minLen
@@ -244,32 +251,41 @@ class tones {
               z2 = -1
             }
               
-            if ((x >= 0 & xX >= 200) || (y >= 0 & yX >= 200) || (z >= 0 & zX >= 200)  || (z2 >= 0 & z2X >= 200))  {
+            if ((x >= 0 && xX >= 200) || (y >= 0 && yX >= 200) || (z >= 0 && zX >= 200)  || (z2 >= 0 && z2X >= 200))  {
 
               //              console.log("Valid Tones "+x+"("+xX+") "+y+"("+yX+") "+z+"("+zX+") "+z2+"("+z2X+") ");
             }
 
             // 2400 / 2600 are special single-tone cases, but present them on both side to support them as a special case
-            if (((z == 6 ) && (z2 != 7))|| ((z == 7) && ( z2 != 6)))  { z2 = z; z2X = zX;}
-            else if (((z2 == 6) && (z != 7)) || (z2 == 7)  && ( z != 6))  { z = z2; zX = z2X;};
+            if (((z == 6 ) && (z2 != 7))|| ((z == 7) && ( z2 != 6)))  { 
+              z2 = z; z2X = zX;
+            } else if (((z2 == 6) && (z != 7)) || (z2 == 7)  && ( z != 6))  { 
+              z = z2; zX = z2X;
+            };
 
 
-            if (xX + yX >= zX +z2X) {
-            // Process the loudest tone
-
-              if ((x >= 0 & xX >= 200) && (y >= 0 & yX >= 200)) {
-                if (y == 3) {
-                  // Long DTMF  
-                  countTones(x,y,1,cb);
+            //Do we have a loud tone?
+             if (((x >= 0 && xX >= 200) && (y >= 0 && yX >= 200)) || ((z >= 0 && zX >= 200)  && (z2 >= 0 && z2X >= 200))) {
+ 
+                // Process the loudest tone
+                if (xX + yX >= zX +z2X) {
+    
+                    if (y == 3) {
+                      // Long DTMF  
+                      countTones(x,y,1,cb);
+                    } else {
+                      // Short DTMF
+                     countTones(x,y,0,cb);
+                   }
+                    
                 } else {
-                  // Short DTMF
-                 countTones(x,y,0,cb);
-               }
-              }  
-            } else {
-                if ((z >= 0 & zX >= 200)  && (z2 >= 0 & z2X >= 200)) {
+                  //SS5
                   countTones(z,z2,2,cb)
-                }
+                }    
+              
+            } else {
+              // Clear
+              countTones(0,0,3,cb)
             }
 
           }, duration / step);
