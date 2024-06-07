@@ -7,6 +7,14 @@ To be debuted at the Retro Hands-On-Hacking village at BSides Leeds 2024
 
 Orginally part of the RetroNetSec Project, but split out as it works just fine as a stand alone thing
 
-Usage:
+Usage :
 
-Either run from docker or just drop in any websever.
+On your own websever 
+
+The entire this is just html/js/css/image, so just dump in wherever your public content on your webserver is
+
+Via docker 
+
+docker run -p 8080:8080 ghcr.io/glennpegden2/bbata:latest 
+
+and that point your web browser to localhost:8080
