@@ -155,6 +155,10 @@ class PhoneNetwork {
                         if (event != "SS5SZ2600" && event != "SS5SZ2400" && event != "SS5SZMF") {
                             this.addToEventLog("Local exchange heard "+event+ " (ignored as line is already connected to remote exchange)");                             
                         } else {
+                            if (event != "SS5SZ2600") {
+                                // TODO: Remove this after BSidesLeeds
+                                this.addToEventLog("Ooooh! You blew a perfect 2600 tone, which probably means you found a Capn' Crunch whistle around BSides Leeds! Well Done. Make sure Glenn saw you doing this and ask him grant some extra Scavenger Hunt points!")
+                            } 
                             this.processEvent("Sieze");
                         }
 
