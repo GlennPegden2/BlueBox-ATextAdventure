@@ -109,6 +109,8 @@ class PhoneNetwork {
         var divlexconnected = document.getElementById("lexconnected")
         var divlexline = document.getElementById("lexline")
 
+        var sender = new Sender({ duration: 100, pause: 40 });
+
         this.eventcount += 1;    
         
         console.log("New Event: "+this.eventcount+" "+event);
@@ -129,6 +131,13 @@ class PhoneNetwork {
                         this.addToEventLog(event+" heard, but the local exchange doesn't know you're there to start dialing, and as you've sent KP the trunk doesn't care about your DTMF tones, which is good as some DMTF and SS5 tones are VERY similar.");
                     } else if (this.home.dialtone == true) {
 
+                        var audioimg = document.getElementById("audio-img");
+                        var iname = audioimg.src.split("/")[audioimg.src.split('/').length-1];
+                
+                        if (iname == "Audio-On.svg") {
+                            sender.play(event.substring(4,5));
+                        } 
+                    	
                         this.home.dialedNumber += event.substring(4,5)
                         this.addToEventLog("Local phone heard "+event+" (forwarded to localexchange). Local exchange heard "+event+ " (waiting for complete number)");
                         if (divdialednumber.style.visibility == "hidden") {

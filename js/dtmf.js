@@ -43,13 +43,16 @@ class tones {
 }
     class Sender {
         constructor(options = {}) {
+
+          var tc = new tones();
+
           var audioContext = new(window.AudioContext || window.webkitAudioContext);
           var grid = [];
-          for (var i = 0; i < dtmfFreqs[0].length; i++) {
+          for (var i = 0; i < tc.dtmf.Freqs[0].length; i++) {
             var row = [];
-            var freq1 = dtmfFreqs[0][i];
-            for (var j = 0; j < dtmfFreqs[1].length; j++) {
-              var freq2 = dtmfFreqs[1][j];
+            var freq1 = tc.dtmf.Freqs[0][i];
+            for (var j = 0; j < tc.dtmf.Freqs[1].length; j++) {
+              var freq2 = tc.dtmf.Freqs[1][j];
               var button = {};
               button.gain1 = audioContext.createGain();
               button.gain1.gain.value = 0.0;
@@ -79,6 +82,9 @@ class tones {
         play(str, cb) {
           if (!cb) cb = function () {};
           if (!str) return cb();
+
+          var tc = new tones();
+
           var seq = str.split("");
           var grid = this.grid;
           var duration = this.options.duration || 100;
@@ -88,11 +94,15 @@ class tones {
             if (!char) return cb();
             var i, j;
             loop1:
-            for (i = 0; i < dtmfChars.length; i++) {
-              for (j = 0; j < dtmfChars[i].length; j++) {
-                if (dtmfChars[i][j] == char) break loop1;
+            for (i = 0; i < tc.dtmf.Chars.length; i++) {
+              for (j = 0; j < tc.dtmf.Chars[i].length; j++) {
+//                console.log("checking "+tc.dtmf.Chars[i][j]+" against "+char);
+                if (tc.dtmf.Chars[i][j] == "DTMF" + char) break loop1;
               }
             }
+
+            console.log("playing tone "+str+" i:"+i+" j:"+j);
+
             var button = grid[i][j];
             if (button) {
               button.gain1.gain.value = 1.0;
@@ -252,8 +262,8 @@ class tones {
             for (var i = 0; i < freqs.length; i++) {
               if (freqs[i] > max) max = freqs[i];
             }
-            var [x,xVol] = findDtmfIndex(freqs, tc.dtmf.Freqs[0], binWidthInHz);
-            var [y,yVol] = findDtmfIndex(freqs, tc.dtmf.Freqs[1], binWidthInHz);
+            var [x,xVol] = findDtmfIndex(freqs, tc.tc.dtmf.Freqs[0], binWidthInHz);
+            var [y,yVol] = findDtmfIndex(freqs, tc.tc.dtmf.Freqs[1], binWidthInHz);
             var [z,zVol] = findDtmfIndex(freqs, tc.ss5.Freqs, binWidthInHz);
 
 
