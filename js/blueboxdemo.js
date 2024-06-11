@@ -50,7 +50,7 @@ class PhoneNetwork {
 
         if (this.home.dialtone) {
             if (this.home.dailedNumber =="" ) {
-                divdialtone.innerHTML = "Phone Audio: Dialtone present (buuuuuuurb)";
+                divdialtone.innerHTML = "Phone Audio: Dialtone present";
             } else {
                 divdialtone.innerHTML = "Phone Audio: Quiet (dialing in progress)";
             }
@@ -64,13 +64,13 @@ class PhoneNetwork {
         if (this.home.connected) {
             divconnected.innerHTML = "Connected to: "+this.home.dailedNumber;
         } else {
-            divconnected.innerHTML = "Not connected";
+            divconnected.innerHTML = "Not connected a number";
         }    
 
         if (this.lex.connected) {
-            divlexconnected.innerHTML = "Connected: Yes";
+            divlexconnected.innerHTML = "Connected to Exchange: Yes";
         } else {
-            divlexconnected.innerHTML = "Connecte: No";
+            divlexconnected.innerHTML = "Connecte to Exchange: No";
         }
 
         if (this.lex.lineup) {
@@ -108,7 +108,6 @@ class PhoneNetwork {
         var divconnected = document.getElementById("connected")
         var divlexconnected = document.getElementById("lexconnected")
         var divlexline = document.getElementById("lexline")
-        var divlexdialednumber= document.getElementById("lexdialednumber")
 
         this.eventcount += 1;    
         
@@ -203,7 +202,14 @@ class PhoneNetwork {
             if ((((this.home.dailedNumber == this.ppn.number) || (this.home.dailedNumber == this.fpn.number)) && this.home.connected == false) ||
                (((this.home.dailedNumber == "KP" + this.ppn.number + "ST") || (this.home.dailedNumber == "KP" + this.fpn.number + "ST")) && this.lex.linesiezed == true)) {
                     this.processEvent("Connected");
-            } else {
+            } else if (this.home.dailedNumber == "0800 500005") {
+                this.addToOputput("Your Easter Egg hunting is admirable, but fruitless. BTW whilst BT not longer update this number with news, it is still in service with just a test message on it. Try it now in the real world.");
+                this.addToOputput("Frustrated at the futility of dialing this number, you slack the reciever down.");
+                this.processEvent("OnHook");    
+            }
+            
+            
+            else {
 //                    console.log("DEBUG: checking |"+this.home.dailedNumber+ "| against |"+this.ppn.number+"| and |"+this.fpn.number+"|");
             }
 
@@ -261,7 +267,10 @@ class PhoneNetwork {
                     }    
 
                     this.addToEventLog(" Local Phone: "+event+" ");
-                    
+
+                    var hookimg = document.getElementById("hook-img");
+                    hookimg.src = "images/OffHook.svg"		
+
                     this.home.dialtone = true;
                     this.home.connected = false; 
                     this.home.dailedNumber = "";
@@ -279,6 +288,8 @@ class PhoneNetwork {
                     this.lex.connected = false;
                     this.lex.linesiezed = false;
                     
+                    var hookimg = document.getElementById("hook-img");
+                    hookimg.src = "images/OnHook.svg"		
 
                     this.addToEventLog(" Local Phone: "+event+" ");
                     break;

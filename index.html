@@ -19,21 +19,21 @@
 
 		if (phoneNet.home.offhook == true) {
 			phoneNet.processEvent("OnHook")
-			receiver.stop();
+//			receiver.stop();
 		} else {
 			phoneNet.home.offhook = true;
 			phoneNet.processEvent("OffHook")
 
-			navigator.getUserMedia({
-			audio: true
-			}, function(stream) {
-			receiver.start(stream, function(event) {
-					phoneNet.processEvent(event);
-			});
-			}, function(e) {
-			alert('Cannot access audio stream.');
-			console.log(e);
-			});
+//			navigator.getUserMedia({
+//			audio: true
+//			}, function(stream) {
+//			receiver.start(stream, function(event) {
+//					phoneNet.processEvent(event);
+//			});
+//			}, function(e) {
+//			alert('Cannot access audio stream.');
+//			console.log(e);
+//			});
 
 		}
 	}
@@ -46,6 +46,46 @@
 		} else {
 			eventlog.style.visibility = "hidden";
 		}
+	}
+
+	function toggleSpeaker() {
+
+		var audioimg = document.getElementById("audio-img");
+
+		var iname = audioimg.src.split("/")[audioimg.src.split('/').length-1];
+
+		if (iname == "Audio-On.svg") {
+			audioimg.src = "images/Audio-Off.svg"		
+		} else {
+			audioimg.src = "images/Audio-On.svg"		
+		}
+	}	
+	function toggleMic() {
+
+		var micimg = document.getElementById("mic-img");
+		var micnote = document.getElementById("micnote");
+
+		var iname = micimg.src.split("/")[micimg.src.split('/').length-1];
+
+		if (iname == "mic.svg") {
+			micimg.src = "images/no-mic.svg"		
+			micnote.innerHTML = "Mic is disabled. Please use keypad below or enable Mic above."
+			receiver.stop();
+		} else {
+			micimg.src = "images/mic.svg"		
+			micnote.innerHTML = "Mic is enabled (though may also have your brower request it). Tones from a real Blue Box are are now accepted."
+			navigator.getUserMedia({
+			audio: true
+			}, function(stream) {
+			receiver.start(stream, function(event) {
+					phoneNet.processEvent(event);
+			});
+			}, function(e) {
+			alert('Cannot access audio stream.');
+			console.log(e);
+			});		
+		}
+
 	}
 
 	function reset() {
@@ -62,9 +102,9 @@
 
 <h3>BlueBox: The Text Adventure</h3>
 <div>
-	<table>
+	<table style="vertical-align: top;">
 		<tr>
-			<td>
+			<td  style="vertical-align: top;">
 				<div id="output"  class="scrollpas">
 					<div>
 						<p>Welcome to BlueBox: The Text Adventure! The Teach Yourself Blueboxing (80s style) Text Adventure. Unlike a traditional text adventure, you drop type command, you play tones into the microphone as if it was an old school telephone. 
@@ -75,41 +115,25 @@
 				</div>
 				<hr/>
 				
-				<h3>Network Status</h3>
-				<table style="width: 100%; table-layout: fixed">
-					<tr>
-						<td valign="top" style="width: 75%;">
-							<table style="width: 100%; table-layout: fixed">
-								<tr><th>Local Phone</th><th>Exchange</th><th>Remote Phone Number</th></tr>
-								<tr><td id="hook"  style="visibility:hidden">OnHook</td><td  id="lexconnected" style="visibility: hidden"></td></td><td  id="fpndiv"></td></tr>
-								<tr><td id="dialtone" style="visibility: hidden"></td><td  id="lexline" style="visibility: hidden"></td><td  id=""></td></tr>
-								<tr><td id="dialednumber" style="visibility: hidden"></td><td  id="lexdialednumber" style="visibility: hidden"></td></td><td  id=""></td></tr>
-								<tr><td id="connected" style="visibility: hidden"></td><td  id=""></td><td  id=""></td></tr>
-							</table>
-						</td>
-					</tr>
-				</table>
-				
-				
-				
-				
 				<div style="visibility: hidden" id="eldiv">
 					<h3>Verbose Event Log</h3>
 					<div id="eventlog"></div>
 				</div>
-				<hr>
-				<p >DMTF decoding based on https://github.com/meefik/dtmf.js (but extended to cover R1/MF & SS5 signalling tones). Icons courtesy of <a href="https://www.visualpharm.com/free-icons/">https://www.visualpharm.com/free-icons/</a></p>
 				
 							</td>
-			<td style="vertical-align: top;"> 
-				<h2>Controls</h2>
-				<table style="width: 100%; text-align:'center'; border-style: solid; vertical-align: top; " >
+			<td style="vertical-align: top; width: 20em;"> 
+				<table style="width: 100%; text-align:center; border-style: solid; vertical-align: top; " >
 					<tr>	
-						<td style="min-width: 10em; text-align: center">
-							<div style="text-align:center; width:100%"><img src="images/Reset.svg" alt="Restart" title="Restart" onclick="reset()"  
-								   style="width: 3em;">&nbsp;<img src="images/Phone Not Being Used.svg" alt="Toggle Phone Hook" title="Toggle Phone Hook" tabindex="-1" onclick="toggleHook()" 
-								   style="width: 3em;">&nbsp;<img src="images/File.svg" alt="Toggle Verbose Logging" title="Toggle Verbose Logging" onclick="toggleLog()"  style="width: 3em;"></div>	
-							<p style="text-align:center; width:100%">Input in the form of tones is also accepted over the microphone</p>		
+						<td style="text-align: center">
+							<h2>Controls</h2>
+							<div style="text-align:center; width:100%">
+								   <img id="hook-img" src="images/OnHook.svg" alt="Toggle Phone Hook" title="Toggle Phone Hook" tabindex="-1" onclick="toggleHook()"  style="width: 3em;"> 
+								   &nbsp;<img src="images/File.svg" alt="Toggle Verbose Logging" title="Toggle Verbose Logging" onclick="toggleLog()"  style="width: 3em;">	
+								   &nbsp;<img id="mic-img" src="images/no-mic.svg" alt="Toggle Microphone" title="Toggle Microphone" onclick="toggleMic()"  style="width: 3em;">
+								   &nbsp;<img id="audio-img" src="images/Audio-On.svg" alt="Toggle Speaker" title="Toggle Speaker" onclick="toggleSpeaker()"  style="width: 3em;">
+								   &nbsp;<img src="images/Reset.svg" alt="Restart" title="Restart" onclick="reset()"  style="width: 3em;"> 
+								</div>	
+							<p style="text-align:center; width:100%" id="micnote">Mic is disabled. Please use keypad below or enable Mic above.</p>		
 						</td>
 					</tr>
 					<tr>
@@ -133,6 +157,29 @@
 								<tr><td><a href="#" onClick="phoneNet.processKey('SS5KP')">KP</a></td><td><a href="#" onClick="phoneNet.processKey('SS50')">0</a></td><td><a href="#" onClick="phoneNet.processKey('SS5ST')">ST</a></td></tr>
 								<tr><td colspan="3"><a href="#" onClick="phoneNet.processKey('SS5SZMF')">Break/Sieze</a></td></tr>		
 							</table>
+						</td>
+					</tr>
+					<tr>
+						<td style="border-style: solid;">
+							<h3>Network Status</h3>
+							<table >
+										<table style="width: 100%; table-layout: fixed; text-align: left" >
+											<tr><td id="hook"  style="visibility:hidden">OnHook</td></tr>
+											<tr><td id="dialtone" style="visibility: hidden"></td></tr>
+											<tr><td id="dialednumber" style="visibility: hidden"></td></tr>
+											<tr><td id="lexconnected" style="visibility: hidden"></td></tr>
+											<tr><td id="connected" style="visibility: hidden"></td></tr>
+											<tr><td id="lexline" style="visibility: hidden"></td></tr>
+							</table>
+						</td>	
+					</tr>
+					<tr>
+						<td style="border-style: solid;">
+							<p >Made By <a href="https://github.com/glennpegden2" target="_new">Glenn Pegden</a></p>
+
+							<p></a>DMTF decoding based on <a href="https://github.com/meefik/dtmf.js" target="_new">https://github.com/meefik/dtmf.js</a> (but extended to cover R1/MF & SS5 signalling tones).</p>
+							<p>Icons courtesy of <a href="https://www.visualpharm.com/free-icons/" target="_new">https://www.visualpharm.com/free-icons/</a></p>
+			
 						</td>
 					</tr>
 				</table>
