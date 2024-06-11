@@ -9,7 +9,7 @@ class PhoneNetwork {
         offhook: false,
         dialtone: false,
         connected: false,
-        dailedNumber: "",
+        dialedNumber: "",
         number: "34893"
     };
 
@@ -49,7 +49,7 @@ class PhoneNetwork {
         }    
 
         if (this.home.dialtone) {
-            if (this.home.dailedNumber =="" ) {
+            if (this.home.dialedNumber =="" ) {
                 divdialtone.innerHTML = "Phone Audio: Dialtone present";
             } else {
                 divdialtone.innerHTML = "Phone Audio: Quiet (dialing in progress)";
@@ -59,10 +59,10 @@ class PhoneNetwork {
             divdialtone.innerHTML = "Phone Audio: No dialtone (silent)";
         }    
 
-        divdialednumber.innerHTML = "Dailed Number: "+this.home.dailedNumber+"";
+        divdialednumber.innerHTML = "Dialed Number: "+this.home.dialedNumber+"";
 
         if (this.home.connected) {
-            divconnected.innerHTML = "Connected to: "+this.home.dailedNumber;
+            divconnected.innerHTML = "Connected to: "+this.home.dialedNumber;
         } else {
             divconnected.innerHTML = "Not connected a number";
         }    
@@ -125,17 +125,19 @@ class PhoneNetwork {
                 this.addToOputput("You may have tried dialing "+event+", or it may be background noise, either way the reciever is on the hook, so nothing happens");
                 this.addToEventLog("Local phone heard "+event+" (ignored, onhook)");
             } else if (event.substring(0,4) == "DTMF" ) {
-                    if (this.home.dialtone == true) {
+                    if (this.home.linesiezed && this.home.dialedNumber.substring(0,2) == "KP") {
+                        this.addToEventLog(event+" heard, but the local exchange doesn't know you're there to start dialing, and as you've sent KP the trunk doesn't care about your DTMF tones, which is good as some DMTF and SS5 tones are VERY similar.");
+                    } else if (this.home.dialtone == true) {
 
-                        this.home.dailedNumber += event.substring(4,5)
+                        this.home.dialedNumber += event.substring(4,5)
                         this.addToEventLog("Local phone heard "+event+" (forwarded to localexchange). Local exchange heard "+event+ " (waiting for complete number)");
                         if (divdialednumber.style.visibility == "hidden") {
                             this.addToOputput("You play a tone associated with dialing a number on the reciever. Congratulations! You have discovered the playing DTMF tones gives just the same result as pressing the number keys on your phone. Now to try dialing a whole phone number");
                             divdialednumber.style.visibility = "visible";
                         }            
 
-                        if ((this.home.dailedNumber != this.fpn.number.substring(0,this.home.dailedNumber.length)) && (this.home.dailedNumber != this.ppn.number.substring(0,this.home.dailedNumber.length))) {
-                            this.addToOputput("Warning: You have dialed "+this.home.dailedNumber+" and this demo only supports two numbers. "+this.ppn.number+" and "+this.fpn.number+", so what you are doing probably isn't going to work. Try putting the phone back on the hook and taking it off again to restart dialing");  
+                        if ((this.home.dialedNumber != this.fpn.number.substring(0,this.home.dialedNumber.length)) && (this.home.dialedNumber != this.ppn.number.substring(0,this.home.dialedNumber.length))) {
+                            this.addToOputput("Warning: You have dialed "+this.home.dialedNumber+" and this demo only supports two numbers. "+this.ppn.number+" and "+this.fpn.number+", so what you are doing probably isn't going to work. Try putting the phone back on the hook and taking it off again to restart dialing");  
                         }      
     
 
@@ -168,28 +170,28 @@ class PhoneNetwork {
 
                             this.addToEventLog("Exchange heard trunk command "+event+" ");
                             if (event == "SS5KP") {
-                                    this.home.dailedNumber = "KP";
+                                    this.home.dialedNumber = "KP";
                                     this.addToOputput("You play a KP tone, which makes the trunk think it's about to revcieve a number to dial. Normally only the exchange can send these numbers, but as you seized the trunk, you now can too!");
                             } else if (event.substring(0,5) == "SS5SZ") { 
                                 console.log("Seize heard, but line already seized");
                             } else if (event == "SS5ST") { 
                                 this.addToOputput("You play a ST tone, this tells the trunk to connect to the number");
-                                if (this.home.dailedNumber == ("KP" + this.ppn.number) )  {
+                                if (this.home.dialedNumber == ("KP" + this.ppn.number) )  {
                                     this.addToOputput("A few seconds pass and the click, you are connected. Congratulations you have just sucessfully blue boxed. As far as billing systems are concerned you are connected to a free phone 0800 number, but you are actually connected to a paid number");
 
                                 } else {
                                     this.addToOputput("KP+"+event+"ST seems like a valid number, but not the one the demo recognises, try "+this.ppn.number+".");
                                 }
                             } else {
-                                if (this.home.dailedNumber.substring(0,2) == "KP") {
-                                    this.home.dailedNumber += event.substring(3)
-//                                    this.addToOputput("You play tones the trunk recognises as valid tones,"+event.substring(3)+". So far the trunk has heard "+this.home.dailedNumber);
-                                    console.log("Dialed number is "+this.home.dailedNumber+" (added "+event.substring(3)+")")
+                                if (this.home.dialedNumber.substring(0,2) == "KP") {
+                                    this.home.dialedNumber += event.substring(3)
+//                                    this.addToOputput("You play tones the trunk recognises as valid tones,"+event.substring(3)+". So far the trunk has heard "+this.home.dialedNumber);
+                                    console.log("Dialed number is "+this.home.dialedNumber+" (added "+event.substring(3)+")")
 
                                 } else {
                                     this.addToOputput("You play a tone the trunk understands, but you didn't start the message properly.");
-                                    console.log("Expected KP, got |"+this.home.dailedNumber+"|");
-                                    this.home.dailedNumber = "";
+                                    console.log("Expected KP, got |"+this.home.dialedNumber+"|");
+                                    this.home.dialedNumber = "";
                                 }
                             } 
 
@@ -203,10 +205,10 @@ class PhoneNetwork {
             }
 
 
-            if ((((this.home.dailedNumber == this.ppn.number) || (this.home.dailedNumber == this.fpn.number)) && this.home.connected == false) ||
-               (((this.home.dailedNumber == "KP" + this.ppn.number + "ST") || (this.home.dailedNumber == "KP" + this.fpn.number + "ST")) && this.lex.linesiezed == true)) {
+            if ((((this.home.dialedNumber == this.ppn.number) || (this.home.dialedNumber == this.fpn.number)) && this.home.connected == false) ||
+               (((this.home.dialedNumber == "KP" + this.ppn.number + "ST") || (this.home.dialedNumber == "KP" + this.fpn.number + "ST")) && this.lex.linesiezed == true)) {
                     this.processEvent("Connected");
-            } else if (this.home.dailedNumber == "0800 500005") {
+            } else if (this.home.dialedNumber == "0800 500005") {
                 this.addToOputput("Your Easter Egg hunting is admirable, but fruitless. BTW whilst BT not longer update this number with news, it is still in service with just a test message on it. Try it now in the real world.");
                 this.addToOputput("Frustrated at the futility of dialing this number, you slack the reciever down.");
                 this.processEvent("OnHook");    
@@ -214,7 +216,7 @@ class PhoneNetwork {
             
             
             else {
-//                    console.log("DEBUG: checking |"+this.home.dailedNumber+ "| against |"+this.ppn.number+"| and |"+this.fpn.number+"|");
+//                    console.log("DEBUG: checking |"+this.home.dialedNumber+ "| against |"+this.ppn.number+"| and |"+this.fpn.number+"|");
             }
 
 
@@ -234,13 +236,13 @@ class PhoneNetwork {
 
                 }
 
-                if (this.home.dailedNumber == this.ppn.number) { 
+                if (this.home.dialedNumber == this.ppn.number) { 
                     this.addToOputput("You have connected to a paid number, I hope you have deep pockets, these used to cost a fortune! In the real world this is actually the awesome ProjectMF Phone Phreaking exchange (but this is just a silly game, not real life). Project MF is a real hardware simulation of a phreakable R1 network, that you can dial for real and try what you learn here!");
                     this.addToOputput("As you want to finish this game, how about finding out how to dial this number WITHOUT the big international charges.");
                 }
 
-                if (this.home.dailedNumber == this.fpn.number) { 
-                    this.addToOputput("Ring Ring ..... \"Welcome to the Trindad &amp; Tobago Tourist Information Line.\"");
+                if (this.home.dialedNumber == this.fpn.number) { 
+                    this.addToOputput("Ring Ring ..... \"<i>Welcome to the Trindad &amp; Tobago Tourist Information Line</i>.\"");
                     this.addToOputput("You have connected to a freephone number, these used to be dull (well, apart from 0800 500005 which was BTs daily office news update!). But this one appears to be outside the UK, that makes it special.");
                 }
             this.updateStatus();
@@ -251,7 +253,7 @@ class PhoneNetwork {
                 this.home.connected = false;
                 this.lex.connected = true;
                 this.lex.linesiezed = true;
-                this.home.dailedNumber = ""
+                this.home.dialedNumber = ""
                 } else {
                     // Not sure this can even get here now
                 this.addToOputput("You blow your little Captain Crunch whistle, or press the magic button on your Blue Box and nothing happens. Maybe because you're not connected to the exchange. Try dialing a number!");
@@ -277,7 +279,7 @@ class PhoneNetwork {
 
                     this.home.dialtone = true;
                     this.home.connected = false; 
-                    this.home.dailedNumber = "";
+                    this.home.dialedNumber = "";
                     this.home.offhook = true;
                     break;
 
@@ -287,7 +289,7 @@ class PhoneNetwork {
                     this.home.dialtone = false;
                     this.home.connected = false; 
                     this.home.offhook = false;
-                    this.home.dailedNumber = "";
+                    this.home.dialedNumber = "";
                     this.lex.lineup = false;
                     this.lex.connected = false;
                     this.lex.linesiezed = false;
