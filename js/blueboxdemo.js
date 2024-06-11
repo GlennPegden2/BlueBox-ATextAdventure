@@ -87,7 +87,7 @@ class PhoneNetwork {
 
     addToEventLog(text) {
         var diveventlog = document.getElementById("eventlog")
-        diveventlog.innerHTML += "<p>["+this.eventcount+"] "+text+"</p>";
+        diveventlog.innerHTML += "["+this.eventcount+"] "+text+"<br/>";
     }
 
     addToOputput(text) {
@@ -99,7 +99,7 @@ class PhoneNetwork {
         this.processEvent(event);
         this.processEvent("CLR");
     }
-    
+
     processEvent (event) {
 
         var divhook = document.getElementById("hook")
@@ -180,8 +180,8 @@ class PhoneNetwork {
                             } else {
                                 if (this.home.dailedNumber.substring(0,2) == "KP") {
                                     this.home.dailedNumber += event.substring(3)
-                                    this.addToOputput("You play tones the trunk recognises as valid tones,"+event.substring(3)+". So far the trunk has heard "+this.home.dailedNumber);
-                                    console.log("Dialed number in "+this.home.dailedNumber+" (added "+event.substring(3)+")")
+//                                    this.addToOputput("You play tones the trunk recognises as valid tones,"+event.substring(3)+". So far the trunk has heard "+this.home.dailedNumber);
+                                    console.log("Dialed number is "+this.home.dailedNumber+" (added "+event.substring(3)+")")
 
                                 } else {
                                     this.addToOputput("You play a tone the trunk understands, but you didn't start the message properly.");
@@ -276,6 +276,9 @@ class PhoneNetwork {
                     this.home.offhook = false;
                     this.home.dailedNumber = "";
                     this.lex.lineup = false;
+                    this.lex.connected = false;
+                    this.lex.linesiezed = false;
+                    
 
                     this.addToEventLog(" Local Phone: "+event+" ");
                     break;

@@ -280,29 +280,9 @@ class tones {
                 };
               
 
-                //TODO: Try both, to get around SS54 vs DTMF2 issue.
-
-
                 var dtmfVol = (xVol+yVol);
                 var mfVol = (zVol+z2Vol)
 
-                
-
-                if ((x == 0 && y == 1)) {
-//                  console.log("Collision detetection of DTMF#2. DMTM tone 1 "+x+" (Vol "+xVol+") | DTMF tone 2 "+y+" (Vol "+yVol+") | "+(xVol+yVol)+" ~~ MF tone 1 "+z+" (Vol "+zVol+") "+z2+" MF tone 2  (Vol "+z2Vol+") | "+(zVol+z2Vol));
-//                  console.log("Collision detetection of DTMF#2. DMTM "+dtmfVol+" | MF "+mfVol +" [ "+(triggerVol*2)+"]");
-                }
-
-
-                // Process the loudest tone
-//                if (dtmfVol >= mfVol) {    
-//                    if (y == 3) {
-//                      // Long DTMF  
-//                      countTones(x,y,1,cb);
-//                    } else {
-//                      // Short DTMF
-//                     countTones(x,y,0,cb);
-//                   }
                   if ((xVol >= (triggerVol)) && (yVol >= (triggerVol))) {
                     if (y == 3) {
                       // Long DTMF  
@@ -316,12 +296,7 @@ class tones {
                   if ((zVol >= triggerVol) && (z2Vol >= triggerVol)) {
                     countTones(z,z2,2,cb)
                   }
-                    
-//                } else {
-//                  //SS5
-//                  countTones(z,z2,2,cb)
-//                }    
-              
+                                  
             } else {
               // Clear
               countTones(0,0,3,cb)
