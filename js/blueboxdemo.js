@@ -95,6 +95,11 @@ class PhoneNetwork {
         textboxt.innerHTML += "<p>"+text+"</p>";
     }
 
+    processKey(event) {
+        this.processEvent(event);
+        this.processEvent("CLR");
+    }
+    
     processEvent (event) {
 
         var divhook = document.getElementById("hook")

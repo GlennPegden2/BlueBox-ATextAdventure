@@ -62,43 +62,82 @@
 
 <h3>BlueBox: The Text Adventure</h3>
 <div>
-	<div style="text-align:right; width:100%"><img src="/images/Reset.svg" alt="Restart" onclick="reset()"  style="width: 3em;">&nbsp;<img src="/images/Phone Not Being Used.svg" alt="Toggle Phone Hook" onclick="toggleHook()" style="width: 3em;">&nbsp;<img src="/images/File.svg" alt="Toggle Verbose Logging" onclick="toggleLog()"  style="width: 3em;"></div>	
-	<p style="text-align:right; width:100%">Input in the form of tones is also accepted over the microphone</p>
+	<table>
+		<tr>
+			<td>
+				<div id="output"  class="scrollpas">
+					<div>
+						<p>Welcome to BlueBox: The Text Adventure! The Teach Yourself Blueboxing (80s style) Text Adventure. Unlike a traditional text adventure, you drop type command, you play tones into the microphone as if it was an old school telephone. 
+							At the top of the screen is an indication of what is happening on the phone network (more will be revealed as you progress) and some action buttons (Toggle Phone Hook simulates lifting the phone reciever/handset, that'a a good place to start).</p>
+						<p>If this is your first attempt at doing this, turning on the verbose log may help you understand what is happening as a lower level.</p>
+						<p>To progress you will need some kind of "Blue Box" device. As Steve Wozniak is no longer selling them and Captain Crunch whistles are no longer in cereal, you can either use a web based one such the one from <a href='https://phreaknet.org/bluebox'>phreaknet.org/bluebox</a> or fire up the Phreaking Tool DOS machine in RetroNetSec.</p>
+					</div>
+				</div>
+				<hr/>
+				
+				<h3>Network Status</h3>
+				<table style="width: 100%; table-layout: fixed">
+					<tr>
+						<td valign="top" style="width: 75%;">
+							<table style="width: 100%; table-layout: fixed">
+								<tr><th>Local Phone</th><th>Exchange</th><th>Remote Phone Number</th></tr>
+								<tr><td id="hook"  style="visibility:hidden">OnHook</td><td  id="lexconnected" style="visibility: hidden"></td></td><td  id="fpndiv"></td></tr>
+								<tr><td id="dialtone" style="visibility: hidden"></td><td  id="lexline" style="visibility: hidden"></td><td  id=""></td></tr>
+								<tr><td id="dialednumber" style="visibility: hidden"></td><td  id="lexdialednumber" style="visibility: hidden"></td></td><td  id=""></td></tr>
+								<tr><td id="connected" style="visibility: hidden"></td><td  id=""></td><td  id=""></td></tr>
+							</table>
+						</td>
+					</tr>
+				</table>
+				
+				
+				
+				
+				<div style="visibility: hidden" id="eldiv">
+					<h3>Verbose Event Log</h3>
+					<div id="eventlog"></div>
+				</div>
+				<hr>
+				<p >DMTF decoding based on https://github.com/meefik/dtmf.js (but extended to cover R1/MF & SS5 signalling tones). Icons courtesy of <a href="https://www.visualpharm.com/free-icons/">https://www.visualpharm.com/free-icons/</a></p>
+				
+							</td>
+			<td style="vertical-align: top;"> 
+				<h2>Controls</h2>
+				<table style="width: 100%; text-align:'center'; border-style: solid; vertical-align: top; " >
+					<tr>	
+						<td style="min-width: 10em; text-align: center">
+							<div style="text-align:center; width:100%"><img src="images/Reset.svg" alt="Restart" title="Restart" onclick="reset()"  
+								   style="width: 3em;">&nbsp;<img src="images/Phone Not Being Used.svg" alt="Toggle Phone Hook" title="Toggle Phone Hook" onclick="toggleHook()" 
+								   style="width: 3em;">&nbsp;<img src="images/File.svg" alt="Toggle Verbose Logging" title="Toggle Verbose Logging" onclick="toggleLog()"  style="width: 3em;"></div>	
+							<p style="text-align:center; width:100%">Input in the form of tones is also accepted over the microphone</p>		
+						</td>
+					</tr>
+					<tr>
+						<td>
+							<h3>DTMF Tones</h3>
+							<table  style="width: 100%; text-align:center">
+								<tr><td><a href="#" onClick="phoneNet.processKey('DTMF1')">1</a></td><td><a href="#" onClick="phoneNet.processKey('DTMF2')">2</a></td><td><a href="#" onClick="phoneNet.processKey('DTMF3')">3</a></td></tr>
+								<tr><td><a href="#" onClick="phoneNet.processKey('DTMF4')">4</a></td><td><a href="#" onClick="phoneNet.processKey('DTMF4')">5</a></td><td><a href="#" onClick="phoneNet.processKey('DTMF6')">6</a></td></tr>
+								<tr><td><a href="#" onClick="phoneNet.processKey('DTMF7')">7</a></td><td><a href="#" onClick="phoneNet.processKey('DTMF8')">8</a></td><td><a href="#" onClick="phoneNet.processKey('DTMF9')">9</a></td></tr>
+								<tr><td><a href="#" onClick="phoneNet.processKey('DTMF*')">*</a></td><td><a href="#" onClick="phoneNet.processKey('DTMF0')">0</a></td><td><a href="#" onClick="phoneNet.processKey('DTMF#')">#</a></td></tr>
+							</table>		
+						</td>
+					</tr>
+					<tr>	
+						<td>
+							<h3>SS5 MF Tones (Trunk Signalling)</h3>
+							<table  style="width: 100%; text-align:center">
+								<tr><td><a href="#" onClick="phoneNet.processKey('SS51')">1</a></td><td><a href="#" onClick="phoneNet.processKey('SS52')">2</a></td><td><a href="#" onClick="phoneNet.processKey('SS53')">3</a></td></tr>
+								<tr><td><a href="#" onClick="phoneNet.processKey('SS54')">4</a></td><td><a href="#" onClick="phoneNet.processKey('SS55')">5</a></td><td><a href="#" onClick="phoneNet.processKey('SS56')">6</a></td></tr>
+								<tr><td><a href="#" onClick="phoneNet.processKey('SS57')">7</a></td><td><a href="#" onClick="phoneNet.processKey('SS58')">8</a></td><td><a href="#" onClick="phoneNet.processKey('SS59')">9</a></td></tr>
+								<tr><td><a href="#" onClick="phoneNet.processKey('SS5KP')">KP</a></td><td><a href="#" onClick="phoneNet.processKey('SS50')">0</a></td><td><a href="#" onClick="phoneNet.processKey('CSS5ST')">ST</a></td></tr>
+								<tr><td colspan="3"><a href="#" onClick="phoneNet.processKey('SS5SZ2MF')">Break/Sieze</a></td></tr>		
+							</table>
+						</td>
+					</tr>
+				</table>
+			</td>	
+		</tr>
+	</table>
 </div>
-<hr/>
-
-<div id="output"  class="scrollpas">
-	<div>
-		<p>Welcome to BlueBox: The Text Adventure! The Teach Yourself Blueboxing (80s style) Text Adventure. Unlike a traditional text adventure, you drop type command, you play tones into the microphone as if it was an old school telephone. 
-			At the top of the screen is an indication of what is happening on the phone network (more will be revealed as you progress) and some action buttons (Toggle Phone Hook simulates lifting the phone reciever/handset, that'a a good place to start).</p>
-		<p>If this is your first attempt at doing this, turning on the verbose log may help you understand what is happening as a lower level.</p>
-		<p>To progress you will need some kind of "Blue Box" device. As Steve Wozniak is no longer selling them and Captain Crunch whistles are no longer in cereal, you can either use a web based one such the one from <a href='https://phreaknet.org/bluebox'>phreaknet.org/bluebox</a> or fire up the Phreaking Tool DOS machine in RetroNetSec.</p>
-	</div>
-</div>
-<hr/>
-
-<h3>Network Status</h3>
-<table style="width: 100%; table-layout: fixed">
-	<tr>
-		<td valign="top" style="width: 75%;">
-			<table style="width: 100%; table-layout: fixed">
-				<tr><th>Local Phone</th><th>Exchange</th><th>Remote Phone Number</th></tr>
-				<tr><td id="hook"  style="visibility:hidden">OnHook</td><td  id="lexconnected" style="visibility: hidden"></td></td><td  id="fpndiv"></td></tr>
-				<tr><td id="dialtone" style="visibility: hidden"></td><td  id="lexline" style="visibility: hidden"></td><td  id=""></td></tr>
-				<tr><td id="dialednumber" style="visibility: hidden"></td><td  id="lexdialednumber" style="visibility: hidden"></td></td><td  id=""></td></tr>
-				<tr><td id="connected" style="visibility: hidden"></td><td  id=""></td><td  id=""></td></tr>
-			</table>
-		</td>
-	</tr>
-</table>
-
-
-
-
-<div style="visibility: hidden" id="eldiv">
-	<h3>Verbose Event Log</h3>
-	<div id="eventlog"></div>
-</div>
-<hr>
-<p >DMTF decoding based on https://github.com/meefik/dtmf.js (but extended to cover R1/MF & SS5 signalling tones). Icons courtesy of <a href="https://www.visualpharm.com/free-icons/">https://www.visualpharm.com/free-icons/</a></p>
 

@@ -15,6 +15,12 @@ The entire this is just html/js/css/image, so just dump in wherever your public 
 
 Via docker 
 
-docker run -p 8080:8080 ghcr.io/glennpegden2/bbata:latest 
+docker run -p 8080:80 ghcr.io/glennpegden2/bbata:latest 
 
 and that point your web browser to localhost:8080
+
+Online Demon 
+
+https://glennpegden2.github.io/BlueBox-ATextAdventure
+
+
