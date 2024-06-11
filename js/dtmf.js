@@ -262,8 +262,8 @@ class tones {
             for (var i = 0; i < freqs.length; i++) {
               if (freqs[i] > max) max = freqs[i];
             }
-            var [x,xVol] = findDtmfIndex(freqs, tc.tc.dtmf.Freqs[0], binWidthInHz);
-            var [y,yVol] = findDtmfIndex(freqs, tc.tc.dtmf.Freqs[1], binWidthInHz);
+            var [x,xVol] = findDtmfIndex(freqs, tc.dtmf.Freqs[0], binWidthInHz);
+            var [y,yVol] = findDtmfIndex(freqs, tc.dtmf.Freqs[1], binWidthInHz);
             var [z,zVol] = findDtmfIndex(freqs, tc.ss5.Freqs, binWidthInHz);
 
 
