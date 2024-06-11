@@ -144,7 +144,7 @@ class tones {
             var imax = 0; 
             for (var i = 0; i < xdtmfFreqs.length; i++) {
               var bin = Math.round(xdtmfFreqs[i] / binWidthInHz);
-//              if (i >=0 && data[bin] >= 200) { console.log(i+" "+bin+" "+data[bin]+" "+xdtmfFreqs[i])}
+//              if (i >=0 && data[bin] >= triggerVol) { console.log(i+" "+bin+" "+data[bin]+" "+xdtmfFreqs[i])}
               if (data[bin] > max) {
                 max = data[bin];
                 index = i;
@@ -165,6 +165,11 @@ class tones {
             var minLen = 1;
             var maxLen = 3;  
 
+
+            var minCnt = 0
+            var maxCnt = 0
+
+
             if ((toneType == 0) || (toneType == 1)){
               // DTMF normal || // DMF Lonf
               if (toneType == 1) {
@@ -183,7 +188,7 @@ class tones {
               tc.dtmf.last = c 
             } else if (toneType == 2) {
               // SS5
-              minLen = 0.3;
+              minLen = 0.6;
               maxLen = 5;
               c = tc.ss5.Chars[t1][t2];  
               last = tc.ss5.last;
@@ -193,33 +198,43 @@ class tones {
             } else if (toneType == 3) {
               // CLEAR 
               c = "CLR";
-              if ((tc.ss5.last != c) && (tc.dtmf.last != c)) {
+              if ((tc.ss5.last != c) || (tc.dtmf.last != c)) {
                 console.log("Clear");
                 tc.ss5.last = c;
                 tc.dtmf.last = c;
-                cb(c);
+                last = c
+                counter = (step * 0.75)*minLen + 1;
               }
             }
 
             var minCnt = (step * 0.75)*minLen
             var maxCnt = (step * 0.75)*maxLen
 
-            if (last == c && toneType != 3) {
-              console.log("Considering Tone (max) "+c+" = "+t1+","+t2+" Counter was "+counter+" type was "+toneType);
+
+            if (last == c) {
+              console.log("Counting Tone "+c+" = "+t1+","+t2+" Counter was "+counter+" of "+minCnt+", type was "+toneType);
               if (counter > minCnt) {
-                  console.log("KEEPING Tone (max) "+c+" = "+t1+","+t2+" Counter was "+counter+" type was "+toneType);
-                  cb(c);
-                  if (toneType == 2) {
-                    tc.ss5.counter = 0;
-                  } else {
+                  console.log("Raising tone event");
+
+                  if ((toneType == 0) || (toneType == 1)) {
                     tc.dtmf.counter = 0;
+                  } else if (toneType == 2) {
+                    tc.ss5.counter = 0;
                   }
-                    }
+
+                  cb(c);
+              }
             } else {
-              if (toneType == 2) {
+//              console.log("Different Tone "+c+"("+toneType+"). Stopping count");
+              if ((toneType == 0) || (toneType == 1)) {
+//                tc.dtmf.counter = 0;
+              } else if (toneType == 2) {
+//                tc.ss5.counter = 0;
+              } else if (toneType == 3) {
                 tc.ss5.counter = 0;
-              } else {
                 tc.dtmf.counter = 0;
+              } else {
+                console.log("Unknown ToneType "+toneType);  
               }
             }
 
@@ -227,10 +242,9 @@ class tones {
 
           var tc = new tones();
 
-          var last; var last2;
-          var counter = 0; var counter2;
           var duration = this.options.duration || 100; // Was 100
           var step = this.options.step || 20; // was 20
+          var triggerVol = this.options.tVol || 230 // was 200
       
           this._timer = setInterval(function () {
             analyser.getByteFrequencyData(freqs);
@@ -238,50 +252,75 @@ class tones {
             for (var i = 0; i < freqs.length; i++) {
               if (freqs[i] > max) max = freqs[i];
             }
-            var [x,xX] = findDtmfIndex(freqs, tc.dtmf.Freqs[0], binWidthInHz);
-            var [y,yX] = findDtmfIndex(freqs, tc.dtmf.Freqs[1], binWidthInHz);
-            var [z,zX] = findDtmfIndex(freqs, tc.ss5.Freqs, binWidthInHz);
+            var [x,xVol] = findDtmfIndex(freqs, tc.dtmf.Freqs[0], binWidthInHz);
+            var [y,yVol] = findDtmfIndex(freqs, tc.dtmf.Freqs[1], binWidthInHz);
+            var [z,zVol] = findDtmfIndex(freqs, tc.ss5.Freqs, binWidthInHz);
 
 
             if (z >= 0) {
                 var sfc = tc.ss5.Freqs.slice();
                 sfc[z] = -999; 
-                var [z2,z2X] = findDtmfIndex(freqs, sfc, binWidthInHz);
+                var [z2,z2Vol] = findDtmfIndex(freqs, sfc, binWidthInHz);
             }  else {
               z2 = -1
             }
               
-            if ((x >= 0 && xX >= 200) || (y >= 0 && yX >= 200) || (z >= 0 && zX >= 200)  || (z2 >= 0 && z2X >= 200))  {
-
-              //              console.log("Valid Tones "+x+"("+xX+") "+y+"("+yX+") "+z+"("+zX+") "+z2+"("+z2X+") ");
-            }
-
-            // 2400 / 2600 are special single-tone cases, but present them on both side to support them as a special case
-            if (((z == 6 ) && (z2 != 7))|| ((z == 7) && ( z2 != 6)))  { 
-              z2 = z; z2X = zX;
-            } else if (((z2 == 6) && (z != 7)) || (z2 == 7)  && ( z != 6))  { 
-              z = z2; zX = z2X;
-            };
-
 
             //Do we have a loud tone?
-             if (((x >= 0 && xX >= 200) && (y >= 0 && yX >= 200)) || ((z >= 0 && zX >= 200)  && (z2 >= 0 && z2X >= 200))) {
- 
+            if (((x >= 0 && xVol >= triggerVol) && (y >= 0 && yVol >= triggerVol)) || ((z >= 0 && zVol >= triggerVol)  || (z2 >= 0 && z2Vol >= triggerVol))) {
+
+                // Warning: Enabling this debug slows things down, which screws with the tone length detection:
+                // console.log("Valid Tones: DMTM1 "+x+" (Vol "+xVol+") | DTMF2 "+y+" (Vol "+yVol+") | MF1 "+z+" (Vol "+zVol+") "+z2+" MF2 (Vol "+z2Vol+") ");
+
+                // 2400 / 2600 are special single-tone cases, but present them on both side to support them as a special case
+                if (((z == 6 ) && (z2 != 7))|| ((z == 7) && ( z2 != 6)))  { 
+                  z2 = z; z2Vol = zVol;
+                } else if (((z2 == 6) && (z != 7)) || (z2 == 7)  && ( z != 6))  { 
+                  z = z2; zVol = z2Vol;
+                };
+              
+
+                //TODO: Try both, to get around SS54 vs DTMF2 issue.
+
+
+                var dtmfVol = (xVol+yVol);
+                var mfVol = (zVol+z2Vol)
+
+                
+
+                if ((x == 0 && y == 1)) {
+//                  console.log("Collision detetection of DTMF#2. DMTM tone 1 "+x+" (Vol "+xVol+") | DTMF tone 2 "+y+" (Vol "+yVol+") | "+(xVol+yVol)+" ~~ MF tone 1 "+z+" (Vol "+zVol+") "+z2+" MF tone 2  (Vol "+z2Vol+") | "+(zVol+z2Vol));
+//                  console.log("Collision detetection of DTMF#2. DMTM "+dtmfVol+" | MF "+mfVol +" [ "+(triggerVol*2)+"]");
+                }
+
+
                 // Process the loudest tone
-                if (xX + yX >= zX +z2X) {
-    
+//                if (dtmfVol >= mfVol) {    
+//                    if (y == 3) {
+//                      // Long DTMF  
+//                      countTones(x,y,1,cb);
+//                    } else {
+//                      // Short DTMF
+//                     countTones(x,y,0,cb);
+//                   }
+                  if ((xVol >= (triggerVol)) && (yVol >= (triggerVol))) {
                     if (y == 3) {
                       // Long DTMF  
                       countTones(x,y,1,cb);
                     } else {
                       // Short DTMF
                      countTones(x,y,0,cb);
-                   }
+                    } 
+                  } 
+                  
+                  if ((zVol >= triggerVol) && (z2Vol >= triggerVol)) {
+                    countTones(z,z2,2,cb)
+                  }
                     
-                } else {
-                  //SS5
-                  countTones(z,z2,2,cb)
-                }    
+//                } else {
+//                  //SS5
+//                  countTones(z,z2,2,cb)
+//                }    
               
             } else {
               // Clear
